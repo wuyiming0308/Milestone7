@@ -78,8 +78,8 @@ class DataProcessor:
 
     def use_api(self, name):
         try:
-            if self.timer == 8:
-                time.sleep(2)
+            if self.timer == 9:
+                time.sleep(1)
                 self.timer = 0
             self.timer += 1
             image = open(name, 'r+b')
