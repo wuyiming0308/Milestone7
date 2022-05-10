@@ -28,8 +28,8 @@ if urlinput != '':
 
     if os.path.exists('./DownloadedFile.zip'):
         os.remove('./DownloadedFile.zip')
-    if os.path.exists('./DownloadedFile'):
-        shutil.rmtree('./DownloadedFile', ignore_errors=True)
+    if os.path.exists('./DownloadFile'):
+        shutil.rmtree('./DownloadFile', ignore_errors=True)
 
     # put zip file in local directory -- this takes a while.. file is big
     # urlretrieve(url, inputFile)
