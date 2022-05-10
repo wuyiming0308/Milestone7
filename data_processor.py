@@ -65,23 +65,26 @@ class DataProcessor:
             myflag = False
 
             for c in souce_ids:
-                if c == 'empty':
-                    continue
-                verify_result_same = self.face_client.face.verify_face_to_face(
-                    c, target_id)
-                if verify_result_same.is_identical:
-                    self.persons.get(customer_id).set_fraud(1)
-                    myflag = True
-                    break
+                try:
+                    verify_result_same = self.face_client.face.verify_face_to_face(
+                        c, target_id)
+                    if verify_result_same.is_identical:
+                        self.persons.get(customer_id).set_fraud(1)
+                        myflag = True
+                        break
+                except:
+                    continue;
             if myflag == False:
                 self.persons.get(customer_id).set_fraud(0)
 
     def use_api(self, name):
         try:
+            '''
             if self.timer == 9:
                 time.sleep(1)
                 self.timer = 0
             self.timer += 1
+            '''
             image = open(name, 'r+b')
             detected_faces1 = self.face_client.face.detect_with_stream(image, detectionModel='deteion_03')
             if detected_faces1 is not None and len(detected_faces1) >= 1:
