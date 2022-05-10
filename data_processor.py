@@ -65,6 +65,8 @@ class DataProcessor:
             myflag = False
 
             for c in souce_ids:
+                if c == 'empty':
+                    continue
                 verify_result_same = self.face_client.face.verify_face_to_face(
                     c, target_id)
                 if verify_result_same.is_identical:
@@ -85,7 +87,7 @@ class DataProcessor:
             if detected_faces1 is not None and len(detected_faces1) >= 1:
                 return detected_faces1[0].face_ide
         except:
-            return ""
+            return "empty"
 
 
     def generateMap(self, target_names, souce_names):
