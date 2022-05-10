@@ -1,1 +1,1 @@
-azure
+azure.cognitiveservices.vision.face
