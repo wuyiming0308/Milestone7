@@ -6,6 +6,8 @@ import pandas as pd
 import numpy as np
 
 import streamlit as st
+import shutil
+
 st.title('Milestone 7')
 st.title('Step 1: URL')
 # url = st.text_input('Enter URL of Test Data', '')
@@ -23,6 +25,12 @@ if urlinput != '':
     # outputDir = "DownloadedFile"
     INPUT_FILE_SAVE_DIR = "./DownloadedFile.zip"
     OUTPUT_DIR = "./DownloadFile/"
+
+    if os.path.exists('./DownloadedFile.zip'):
+        os.remove('./DownloadedFile.zip')
+    if os.path.exists('./DownloadedFile'):
+        shutil.rmtree('./DownloadedFile', ignore_errors=True)
+
     # put zip file in local directory -- this takes a while.. file is big
     # urlretrieve(url, inputFile)
     urlretrieve(url, INPUT_FILE_SAVE_DIR)
