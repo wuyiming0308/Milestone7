@@ -85,7 +85,7 @@ class DataProcessor:
             image = open(name, 'r+b')
             detected_faces1 = self.face_client.face.detect_with_stream(image, detectionModel='deteion_03')
             if detected_faces1 is not None and len(detected_faces1) >= 1:
-                return detected_faces1[0].face_ide
+                return detected_faces1[0].face_id
         except:
             return "empty"
 
