@@ -18,7 +18,7 @@ with st.form(key='my_form'):
 
 if urlinput != '':
     url = urlinput
-    csvname = url[-15:-9]
+    csvname = url[-16:-9]
     # inputFile = "./DownloadedFile.zip"
     # outputDir = "DownloadedFile"
     INPUT_FILE_SAVE_DIR = "./DownloadedFile.zip"
