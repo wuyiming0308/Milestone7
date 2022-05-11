@@ -5,10 +5,12 @@ from urllib.request import urlretrieve
 from azure.cognitiveservices.vision.face import FaceClient
 from msrest.authentication import CognitiveServicesCredentials
 from person import Person
+import pandas as pd
+import numpy as np
 import glob
+import shutil
 import zipfile
-import time
-import asyncio
+import os
 OUTPUT_DIR = "./DownloadFile/"
 INPUT_FILE_SAVE_DIR = "./DownloadedFile.zip"
 SOURCE_NAME = './PeopleSourceImgs/'
@@ -21,15 +23,24 @@ ENDPOINT = "https://aokugeu.cognitiveservices.azure.com/"
 class DataProcessor:
 
     # constuctor
-    def __init__(self, url=''):
+    def __init__(self, url=""):
         self.url = url
         self.face_client = FaceClient(
             ENDPOINT, CognitiveServicesCredentials(KEY))
         self.persons = {}
         self.timer = 0
 
+    def set_url(self, url):
+        if url != self.url:
+            self.url = url
+
     def download_and_process_file(self) -> bool:
         try:
+            # delete file that alread exisits
+            if os.path.exists(INPUT_FILE_SAVE_DIR):
+                os.remove(INPUT_FILE_SAVE_DIR)
+            if os.path.exists(OUTPUT_DIR):
+                shutil.rmtree(OUTPUT_DIR, ignore_errors=True)
             urlretrieve(self.url, INPUT_FILE_SAVE_DIR)
             if not zipfile.is_zipfile(INPUT_FILE_SAVE_DIR):
                 return False
@@ -43,7 +54,7 @@ class DataProcessor:
 
     def execute(self):
         self.detect_face()
-        return False
+        return self.persons;
 
     def detect_face(self):
         target_map = self.generateMap(OUTPUT_DIR, SOURCE_NAME)
@@ -122,3 +133,14 @@ class DataProcessor:
         if id in self.persons:
             return self.persons.get(id)
         return ""
+
+    def convert_perosn_to_df(self):
+        data = [[v.get_customer_id(), v.get_account_id(), v.fraud]
+            for v in self.persons.values()]
+        #df = pd.DataFrame(data, columns = ['CustomerId', 'AccountId', 'verifiedId'])
+        df = pd.DataFrame(data, columns=['custID', 'AccountId', 'verifiedId'])
+        df['face'] = np.where((df['verifiedId'] == 0), 'NA', 0)
+        output_face = df[['custID', 'face']]
+        output_face['custID'] = output_face['custID'].astype(int)
+    
+        return output_face 

@@ -1,54 +1,11 @@
-from os import mkdir
-from urllib.request import urlretrieve
-from zipfile import ZipFile
-import os
 import pandas as pd
 import numpy as np
+import os
 
-import streamlit as st
-import shutil
-
-st.title('Milestone 7')
-st.title('Step 1: URL')
-# url = st.text_input('Enter URL of Test Data', '')
-#st.write('The url you entered is', url)
-
-with st.form(key='my_form'):
-    urlinput = st.text_input(label='Enter URL of Test Data')
-    submit_button = st.form_submit_button(label='Submit')
-# https://www.dropbox.com/s/w15ev8i0noj85sa/4269819.zip?dl=1
-
-if urlinput != '':
-    url = urlinput
-    csvname = url[-16:-9]
-    # inputFile = "./DownloadedFile.zip"
-    # outputDir = "DownloadedFile"
-    INPUT_FILE_SAVE_DIR = "./DownloadedFile.zip"
-    OUTPUT_DIR = "./DownloadFile/"
-
-    if os.path.exists('./DownloadedFile.zip'):
-        os.remove('./DownloadedFile.zip')
-    if os.path.exists('./DownloadFile'):
-        shutil.rmtree('./DownloadFile', ignore_errors=True)
-
-    # put zip file in local directory -- this takes a while.. file is big
-    # urlretrieve(url, inputFile)
-    urlretrieve(url, INPUT_FILE_SAVE_DIR)
-
-    # unzip contents into output folder -- this takes a while.. file is big
-    # with ZipFile(inputFile) as zipObj:
-    #     zipObj.extractall(outputDir)
-    with ZipFile(INPUT_FILE_SAVE_DIR) as zipObj:
-        zipObj.extractall(OUTPUT_DIR)
-
-    # Extract pic names in the folder
+def util_function():
     file_list = os.listdir("./DownloadFile")
     file_list.sort()
-    # remove .jpg
-    new_list = [s.replace(".jpg", "") for s in file_list]
-
-################ Milestone 2 ######################
-    # input csv
+     # input csv
     # read the csv file (put 'r' before the path string to address any special characters in the path, such as '\'). Don't forget to put the file name at the end of the path + ".csv"
     CustomerList = pd.read_csv("./liveCustomerList.csv")
     CustomerList['firstName'] = CustomerList['firstName'].str.upper()
@@ -56,6 +13,7 @@ if urlinput != '':
     FraudList = pd.read_csv("./liveFraudList.csv")
     # ***change 1 to NA
     FraudList["fraudster"] = 'NA'
+
 
     # change custID list to Dataframe
     # ***separate custID and loginAcct
@@ -109,7 +67,6 @@ if urlinput != '':
 
     # FraudTestOnput.csv
     output_verify = AcctName_verify[['custID', 'rightAcctFlag']]
-
 ################ Milestone 5 ######################
     # read startbalance & bankTransactions
     acctStBalan = pd.read_csv('./Milestone5Files/startBalance.csv')
@@ -200,22 +157,12 @@ if urlinput != '':
     output_date = pred_result_custID[['custID', 'date']]
     output_date.columns = ['custID', 'date1']
 
-################ Milestone 1 ######################
-    from data_processor import DataProcessor
-    import pandas as pd
-    data_processer = DataProcessor("dd")
-    data_processer.execute()
-    people = data_processer.persons
-    data = [[v.get_customer_id(), v.get_account_id(), v.fraud]
-            for v in people.values()]
-    #df = pd.DataFrame(data, columns = ['CustomerId', 'AccountId', 'verifiedId'])
-    df = pd.DataFrame(data, columns=['custID', 'AccountId', 'verifiedId'])
-    df['face'] = np.where((df['verifiedId'] == 0), 'NA', 0)
-    output_face = df[['custID', 'face']]
-    output_face['custID'] = output_face['custID'].astype(int)
+    return output_fraud, output_verify, output_date
 
 
-################ Join Results ######################
+
+def join_results(output_face):
+    output_fraud,output_verify, output_date =  util_function()
     fraud_verify = output_fraud.merge(output_verify, on='custID', how='left')
     fraud_verify_date = fraud_verify.merge(
         output_date, on='custID', how='left')
@@ -226,31 +173,10 @@ if urlinput != '':
     output_prep['date'] = output_prep['date1']
     output_prep['date'] = np.where((output_prep['fraudster'] == 'NA') | (output_prep['rightAcctFlag'] == 'NA') | (
         output_prep['date1'] == 'NA') | (output_prep['face'] == 'NA'), 'NA', output_prep['date1'])
-
-################ output csv ######################
-    # output csv
+    
+        # output csv
     output = output_prep[['custID', 'date']]
     output.columns = ['loginID', 'date']
 
-    @st.cache
-    def convert_df_to_csv(df):
-        # IMPORTANT: Cache the conversion to prevent computation on every rerun
-        return df.to_csv(index=False).encode('utf-8')
+    return output
 
-
-else:
-    st.text('Please enter url above and click the Submit button')
-    st.text('Please allow some time for downloadable solution file to pop up')
-
-
-if urlinput != '':
-    st.title('Step 2: Download Result')
-    # st.text('Step 2: Download Fraudster Detection Result')
-    st.download_button(
-        label='Download',
-        data=convert_df_to_csv(output),
-        file_name=csvname+'.csv',
-        mime='text/csv',)
-    st.text('Now download the csv file')
-else:
-    st.text('')
